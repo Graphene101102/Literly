@@ -1,8 +1,9 @@
 import React from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
-import StartScreen from './pages/user/StartScreen';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
 import AuthScreen from './pages/user/AuthScreen';
 import HomePageLessons from './pages/user/HomePageLessons';
+import LessonDetail from './pages/user/LessonDetail';
 import HomePageExercises from './pages/user/HomePageExercises';
 import ExerciseDetail from './pages/user/ExerciseDetail';
 import HomePageDocuments from './pages/user/HomePageDocuments';
@@ -24,31 +25,35 @@ import Statistics from './pages/admin/Statistics';
 import './App.css';
 
 function App() {
-  const navigate = useNavigate();
+  const { user, loading } = useAuth();
 
-  const handleTabChange = (tab) => {
-    // This function might be removed or adapted as the Header for Admin will be different
-    switch (tab) {
-      case 'BÀI HỌC':
-        navigate('/lessons');
-        break;
-      case 'BÀI TẬP':
-        navigate('/exercises');
-        break;
-      case 'TÀI LIỆU':
-        navigate('/documents');
-        break;
-      default:
-        navigate('/lessons');
-    }
-  };
+  if (loading) {
+    return <div className="h-screen w-screen flex items-center justify-center text-2xl font-bold text-blue-800">Đang tải...</div>;
+  }
 
   return (
     <Routes>
+      {/* Auth Route - redirect if already logged in */}
+      <Route
+        path="/"
+        element={
+          user
+            ? <Navigate to={user.role === 'admin' ? '/admin/students' : '/lessons'} replace />
+            : <AuthScreen />
+        }
+      />
+      <Route
+        path="/auth"
+        element={
+          user
+            ? <Navigate to={user.role === 'admin' ? '/admin/students' : '/lessons'} replace />
+            : <AuthScreen />
+        }
+      />
+
       {/* Student/Public Routes */}
-      <Route path="/" element={<StartScreen />} />
-      <Route path="/auth" element={<AuthScreen />} />
       <Route path="/lessons" element={<HomePageLessons />} />
+      <Route path="/lesson/:id" element={<LessonDetail />} />
       <Route path="/exercises" element={<HomePageExercises />} />
       <Route path="/exercises/:id" element={<ExerciseDetail />} />
       <Route path="/documents" element={<HomePageDocuments />} />
