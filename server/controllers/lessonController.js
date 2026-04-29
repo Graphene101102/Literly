@@ -7,7 +7,26 @@ import Lesson from '../models/Lesson.js';
 // @route   GET /api/lesson-groups
 export const getLessonGroups = async (req, res) => {
     try {
-        const groups = await LessonGroup.find({}).sort({ createdAt: 1 });
+        let query = {};
+        if (req.user && req.user.role === 'student') {
+            if (req.user.class) {
+                query = {
+                    $or: [
+                        { allowedClasses: { $exists: false } },
+                        { allowedClasses: { $size: 0 } },
+                        { allowedClasses: req.user.class }
+                    ]
+                };
+            } else {
+                query = {
+                    $or: [
+                        { allowedClasses: { $exists: false } },
+                        { allowedClasses: { $size: 0 } }
+                    ]
+                };
+            }
+        }
+        const groups = await LessonGroup.find(query).sort({ createdAt: 1 }).populate('allowedClasses', 'name');
         res.json(groups);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -18,7 +37,7 @@ export const getLessonGroups = async (req, res) => {
 // @route   POST /api/lesson-groups
 export const createLessonGroup = async (req, res) => {
     try {
-        const { name } = req.body;
+        const { name, allowedClasses } = req.body;
         if (!name || !name.trim()) {
             return res.status(400).json({ message: 'Tên nhóm bài học không được để trống' });
         }
@@ -26,8 +45,9 @@ export const createLessonGroup = async (req, res) => {
         if (exists) {
             return res.status(400).json({ message: 'Nhóm bài học đã tồn tại' });
         }
-        const group = await LessonGroup.create({ name: name.trim() });
-        res.status(201).json(group);
+        const group = await LessonGroup.create({ name: name.trim(), allowedClasses: allowedClasses || [] });
+        const populated = await LessonGroup.findById(group._id).populate('allowedClasses', 'name');
+        res.status(201).json(populated);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -41,7 +61,11 @@ export const updateLessonGroup = async (req, res) => {
         if (!group) return res.status(404).json({ message: 'Không tìm thấy nhóm' });
 
         group.name = req.body.name || group.name;
-        const updated = await group.save();
+        if (req.body.allowedClasses !== undefined) {
+            group.allowedClasses = req.body.allowedClasses;
+        }
+        await group.save();
+        const updated = await LessonGroup.findById(group._id).populate('allowedClasses', 'name');
         res.json(updated);
     } catch (error) {
         res.status(500).json({ message: error.message });

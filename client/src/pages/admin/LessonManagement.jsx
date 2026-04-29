@@ -31,7 +31,9 @@ const LessonManagement = () => {
   // Group popup
   const [showGroupPopup, setShowGroupPopup] = useState(false);
   const [editingGroup, setEditingGroup] = useState(null);
-  const [groupName, setGroupName] = useState('');
+  const [groupForm, setGroupForm] = useState({ name: '', allowedClasses: [] });
+
+  const [classes, setClasses] = useState([]);
 
   // Lesson view
   const [selectedGroup, setSelectedGroup] = useState(null);
@@ -48,7 +50,19 @@ const LessonManagement = () => {
   const [error, setError] = useState('');
 
   // ============ FETCH GROUPS ============
-  useEffect(() => { fetchGroups(); }, []);
+  useEffect(() => { 
+    fetchGroups(); 
+    fetchClasses();
+  }, []);
+
+  const fetchClasses = async () => {
+    try {
+      const { data } = await api.get('/classes');
+      setClasses(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const fetchGroups = async () => {
     try {
@@ -64,14 +78,17 @@ const LessonManagement = () => {
   // ============ GROUP CRUD ============
   const openAddGroup = () => {
     setEditingGroup(null);
-    setGroupName('');
+    setGroupForm({ name: '', allowedClasses: [] });
     setError('');
     setShowGroupPopup(true);
   };
 
   const openEditGroup = (g) => {
     setEditingGroup(g);
-    setGroupName(g.name);
+    setGroupForm({ 
+      name: g.name, 
+      allowedClasses: g.allowedClasses ? g.allowedClasses.map(c => c._id || c) : [] 
+    });
     setError('');
     setShowGroupPopup(true);
   };
@@ -81,10 +98,10 @@ const LessonManagement = () => {
     setError('');
     try {
       if (editingGroup) {
-        const { data } = await api.put(`/lesson-groups/${editingGroup._id}`, { name: groupName });
+        const { data } = await api.put(`/lesson-groups/${editingGroup._id}`, groupForm);
         setGroups(groups.map(g => g._id === editingGroup._id ? data : g));
       } else {
-        const { data } = await api.post('/lesson-groups', { name: groupName });
+        const { data } = await api.post('/lesson-groups', groupForm);
         setGroups([...groups, data]);
       }
       setShowGroupPopup(false);
@@ -208,7 +225,14 @@ const LessonManagement = () => {
                       <div key={g._id} className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                         <div className="flex items-center">
                           <BookOpen size={22} className="text-blue-500 mr-3" />
-                          <span className="text-xl font-medium text-gray-800">{index + 1}. {g.name}</span>
+                          <div>
+                            <span className="text-xl font-medium text-gray-800">{index + 1}. {g.name}</span>
+                            {g.allowedClasses && g.allowedClasses.length > 0 && (
+                              <div className="text-xs text-gray-500 mt-1">
+                                Lớp: {g.allowedClasses.map(c => c.name).join(', ')}
+                              </div>
+                            )}
+                          </div>
                         </div>
                         <div className="flex space-x-3">
                           <button onClick={() => openEditGroup(g)} className="bg-blue-400 hover:bg-blue-500 text-white p-2 rounded-full shadow-md transition-transform hover:scale-110" title="Sửa tên">
@@ -291,12 +315,34 @@ const LessonManagement = () => {
           <label className="block text-sm font-semibold text-blue-800 mb-1">Tên bài học (nhóm)</label>
           <input
             type="text"
-            value={groupName}
-            onChange={(e) => setGroupName(e.target.value)}
+            value={groupForm.name}
+            onChange={(e) => setGroupForm({ ...groupForm, name: e.target.value })}
             placeholder="VD: Văn bản 1: Trái Đất - cái nôi của sự sống"
             className="w-full border border-blue-200 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
             required
           />
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-blue-800 mb-2">Hiển thị cho các lớp (để trống là tất cả)</label>
+          <div className="flex flex-wrap gap-3">
+             {classes.map(c => (
+                <label key={c._id} className="flex items-center space-x-2 bg-white px-3 py-2 rounded-lg border border-blue-100 shadow-sm cursor-pointer hover:bg-blue-50">
+                   <input 
+                      type="checkbox" 
+                      checked={groupForm.allowedClasses.includes(c._id)}
+                      onChange={(e) => {
+                          if (e.target.checked) {
+                              setGroupForm({ ...groupForm, allowedClasses: [...groupForm.allowedClasses, c._id] });
+                          } else {
+                              setGroupForm({ ...groupForm, allowedClasses: groupForm.allowedClasses.filter(id => id !== c._id) });
+                          }
+                      }}
+                      className="form-checkbox h-4 w-4 text-blue-500 rounded focus:ring-blue-400"
+                   />
+                   <span className="text-gray-700 font-medium">{c.name}</span>
+                </label>
+             ))}
+          </div>
         </div>
         <div className="flex justify-end space-x-3 pt-2">
           <button type="button" onClick={() => setShowGroupPopup(false)} className="px-5 py-2 rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100 font-medium">Hủy</button>

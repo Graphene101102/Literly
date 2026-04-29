@@ -9,7 +9,7 @@ const router = express.Router();
 
 // Class routes
 router.route('/')
-    .get(protect, getClasses)
+    .get(getClasses)
     .post(protect, admin, createClass);
 
 router.route('/:id')
