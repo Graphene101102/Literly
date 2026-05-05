@@ -3,7 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import DefaultAvatar from '../assets/user-avatar.png';
 
-const API_BASE = 'http://localhost:5001';
+const API_BASE = import.meta.env.MODE === 'production' ? '' : 'http://localhost:5001';
 
 const Sidebar = () => {
   const { user } = useAuth();

@@ -6,6 +6,8 @@ import api from '../../services/api';
 import { ArrowLeft, BookOpen, X, Download, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+const API_BASE = import.meta.env.MODE === 'production' ? '' : 'http://localhost:5001';
+
 const VietnameseKnowledge = () => {
   const navigate = useNavigate();
   const [documents, setDocuments] = useState([]);
@@ -103,7 +105,7 @@ const VietnameseKnowledge = () => {
               </h3>
               <div className="flex items-center space-x-3">
                 <a
-                  href={`http://localhost:5001${selectedDoc.fileUrl}`}
+                  href={`${API_BASE}${selectedDoc.fileUrl}`}
                   download
                   className="p-2.5 bg-gray-800 hover:bg-gray-700 rounded-full transition-all hover:scale-110 active:scale-95"
                   title="Tải xuống PDF"
@@ -123,7 +125,7 @@ const VietnameseKnowledge = () => {
             {/* PDF Content */}
             <div className="flex-grow bg-gray-200 relative">
               <iframe
-                src={`http://localhost:5001${selectedDoc.fileUrl}#toolbar=0`}
+                src={`${API_BASE}${selectedDoc.fileUrl}#toolbar=0`}
                 className="w-full h-full border-0"
                 title="PDF Viewer"
               />

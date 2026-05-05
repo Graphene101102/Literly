@@ -5,7 +5,7 @@ import { Settings, LogOut } from 'lucide-react';
 import DefaultAvatar from '../assets/user-avatar.png';
 import SettingsModal from './SettingsModal';
 
-const API_BASE = 'http://localhost:5001';
+const API_BASE = import.meta.env.MODE === 'production' ? '' : 'http://localhost:5001';
 
 const AvatarDropdown = () => {
     const [isOpen, setIsOpen] = useState(false);

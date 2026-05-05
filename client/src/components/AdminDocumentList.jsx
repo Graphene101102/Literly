@@ -5,6 +5,8 @@ import Sidebar from './Sidebar';
 import EarthBackground from '../assets/earth-background.png';
 import api from '../services/api';
 
+const API_BASE = import.meta.env.MODE === 'production' ? '' : 'http://localhost:5001';
+
 const AdminDocumentList = ({ title, category }) => {
     const [documents, setDocuments] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -101,7 +103,7 @@ const AdminDocumentList = ({ title, category }) => {
                                 {documents.map((doc) => (
                                     <div key={doc._id} className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm border border-red-100">
                                         <a
-                                            href={`http://localhost:5001${doc.fileUrl}`}
+                                            href={`${API_BASE}${doc.fileUrl}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="flex items-center hover:text-blue-600 transition-colors flex-grow"
