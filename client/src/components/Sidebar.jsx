@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import DefaultAvatar from '../assets/user-avatar.png';
+import { Menu, X } from 'lucide-react';
 
 const API_BASE = import.meta.env.MODE === 'production' ? '' : 'http://localhost:5001';
 
 const Sidebar = () => {
   const { user } = useAuth();
+  const [isOpen, setIsOpen] = useState(false);
   const avatarSrc = user?.avatar ? `${API_BASE}${user.avatar}` : DefaultAvatar;
 
   const navItems = [
@@ -49,26 +51,50 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="w-64 bg-white shadow-lg h-full flex flex-col p-4">
-      <div className="flex items-center mb-6">
-        <img src={avatarSrc} alt="User Avatar" className="h-12 w-12 rounded-full mr-3 object-cover" />
-        <span className="text-lg font-semibold text-gray-800">{user?.fullName || 'Giáo viên'}</span>
+    <>
+      {/* Nút Toggle Menu trên Điện thoại */}
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="lg:hidden fixed bottom-6 right-6 z-[60] bg-blue-600 text-white p-4 rounded-full shadow-[0_4px_20px_rgba(0,0,0,0.3)] flex items-center justify-center transition-transform active:scale-95"
+      >
+        {isOpen ? <X size={28} /> : <Menu size={28} />}
+      </button>
+
+      {/* Lớp nền đen mờ khi mở Menu */}
+      {isOpen && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity" 
+          onClick={() => setIsOpen(false)}
+        ></div>
+      )}
+
+      {/* Nội dung Sidebar */}
+      <div className={`
+        fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-2xl flex flex-col p-4 transform transition-transform duration-300 ease-in-out
+        lg:relative lg:translate-x-0 lg:h-full lg:w-64 lg:shadow-lg lg:z-auto
+        ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
+        <div className="flex items-center mb-6">
+          <img src={avatarSrc} alt="User Avatar" className="h-12 w-12 rounded-full mr-3 object-cover shadow-sm" />
+          <span className="text-lg font-bold text-blue-900">{user?.fullName || 'Giáo viên'}</span>
+        </div>
+        <nav className="flex flex-col space-y-2 overflow-y-auto">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.name}
+              to={item.path}
+              onClick={() => setIsOpen(false)}
+              className={({ isActive }) =>
+                `flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-100 transition-colors ${isActive ? 'bg-blue-200 font-bold text-blue-800 shadow-sm' : ''}`
+              }
+            >
+              <span className="mr-3 text-blue-600">{item.icon}</span>
+              {item.name}
+            </NavLink>
+          ))}
+        </nav>
       </div>
-      <nav className="flex flex-col space-y-2">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.name}
-            to={item.path}
-            className={({ isActive }) =>
-              `flex items-center p-3 rounded-lg text-gray-700 hover:bg-blue-100 ${isActive ? 'bg-blue-200 font-bold text-blue-800' : ''}`
-            }
-          >
-            <span className="mr-3 text-blue-600">{item.icon}</span>
-            {item.name}
-          </NavLink>
-        ))}
-      </nav>
-    </div>
+    </>
   );
 };
 

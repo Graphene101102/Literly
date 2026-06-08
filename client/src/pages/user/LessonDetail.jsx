@@ -79,12 +79,12 @@ const LessonDetail = () => {
             </div>
 
             {/* Content */}
-            <div className="flex-grow relative overflow-y-auto p-8">
+            <div className="flex-grow relative overflow-y-auto p-4 md:p-8">
                 <div className="max-w-4xl mx-auto bg-white bg-opacity-90 rounded-2xl shadow-lg border border-blue-100 overflow-hidden">
 
                     {/* Header - compact */}
-                    <div className="bg-blue-400 px-6 py-3 flex items-center justify-between">
-                        <div className="flex items-center">
+                    <div className="bg-blue-400 px-4 md:px-6 py-3 flex flex-col md:flex-row items-start md:items-center justify-between gap-2">
+                        <div className="flex items-center w-full">
                             <button onClick={() => navigate('/lessons')} className="mr-3 p-1.5 rounded-full hover:bg-blue-300 transition-colors">
                                 <ArrowLeft size={22} className="text-white" />
                             </button>
@@ -96,10 +96,16 @@ const LessonDetail = () => {
                     </div>
 
                     {/* Body */}
-                    <div className="p-8">
+                    <div className="p-4 md:p-8">
                         {/* Mô tả */}
                         {lesson.description && (
                             <p className="text-gray-600 italic mb-6 text-base">{lesson.description}</p>
+                        )}
+                        {/* Hình ảnh */}
+                        {lesson.imageUrl && (
+                            <div className="mb-6 flex justify-center">
+                                <img src={lesson.imageUrl} alt={lesson.title} className="max-w-full h-auto rounded-xl shadow-md max-h-[500px] object-contain" />
+                            </div>
                         )}
                         {/* Video */}
                         {lesson.type === 'VIDEO' && embedUrl && (

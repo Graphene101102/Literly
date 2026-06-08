@@ -10,14 +10,16 @@ const DocumentManagement = () => {
   return (
     <div className="h-screen w-screen flex flex-col bg-blue-50">
       <AdminHeader />
-      <div className="flex flex-grow">
-        <Sidebar />
-        <div className="relative flex-grow p-8">
+      <div className="flex flex-col lg:flex-row flex-grow overflow-hidden">
+        <div className="lg:h-full lg:flex-shrink-0 overflow-y-auto lg:overflow-visible max-h-48 lg:max-h-full">
+          <Sidebar />
+        </div>
+        <div className="relative flex-grow p-4 lg:p-8 overflow-y-auto">
           <div className="absolute inset-0 bg-no-repeat bg-center bg-cover" style={{ backgroundImage: `url(${EarthBackground})` }}>
             <div className="w-full h-full bg-white opacity-85"></div>
           </div>
 
-          <div className="relative z-10 bg-red-50 bg-opacity-75 p-8 mt-10 w-full h-4/5 rounded-lg shadow-lg flex flex-col items-center justify-center">
+          <div className="relative z-10 bg-red-50 bg-opacity-75 p-4 lg:p-8 mt-4 lg:mt-10 w-full min-h-[80%] rounded-lg shadow-lg flex flex-col items-center justify-center">
             <h2 className="text-3xl font-bold text-gray-800 mb-12">Quản lý tài liệu</h2>
 
             <div className="grid grid-cols-2 gap-8 w-full max-w-4xl">

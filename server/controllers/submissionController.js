@@ -48,13 +48,51 @@ export const submitExercise = async (req, res) => {
                 processedAnswers.push({
                     exerciseItem: item._id,
                     itemType: 'essay',
-                    essayAnswer: ans.essayAnswer || '',
+                    essayAnswer: ans?.essayAnswer || '',
                     essayScore: null
                 });
             } else if (item.type === 'document') {
                 processedAnswers.push({
                     exerciseItem: item._id,
                     itemType: 'document'
+                });
+            } else if (item.type === 'drag_and_drop' || item.type === 'match_columns') {
+                let allCorrect = true;
+                mcTotal++;
+                
+                if (!ans || !ans.dragAndDropMatches || ans.dragAndDropMatches.length !== item.matchingPairs.length) {
+                    allCorrect = false;
+                } else {
+                    for (const pair of item.matchingPairs) {
+                        const studentMatch = ans.dragAndDropMatches.find(m => m.prompt === pair.prompt);
+                        if (!studentMatch) {
+                            allCorrect = false;
+                            break;
+                        }
+                        
+                        const correctAnswers = [...(pair.answers || [])].sort();
+                        const submittedAnswers = [...(studentMatch.answers || [])].sort();
+                        
+                        if (correctAnswers.length !== submittedAnswers.length) {
+                            allCorrect = false;
+                            break;
+                        }
+                        for (let i = 0; i < correctAnswers.length; i++) {
+                            if (correctAnswers[i] !== submittedAnswers[i]) {
+                                allCorrect = false;
+                                break;
+                            }
+                        }
+                        if (!allCorrect) break;
+                    }
+                }
+                if (allCorrect) mcCorrect++;
+                
+                processedAnswers.push({
+                    exerciseItem: item._id,
+                    itemType: item.type,
+                    dragAndDropMatches: ans?.dragAndDropMatches || [],
+                    isCorrect: allCorrect
                 });
             }
         }

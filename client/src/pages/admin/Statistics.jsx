@@ -190,14 +190,16 @@ const Statistics = () => {
   return (
     <div className="h-screen w-screen flex flex-col bg-blue-50">
       <AdminHeader />
-      <div className="flex flex-grow">
-        <Sidebar />
-        <div className="relative flex-grow p-8">
+      <div className="flex flex-col lg:flex-row flex-grow overflow-hidden">
+        <div className="lg:h-full lg:flex-shrink-0 overflow-y-auto lg:overflow-visible max-h-48 lg:max-h-full">
+          <Sidebar />
+        </div>
+        <div className="relative flex-grow p-4 lg:p-8 overflow-y-auto">
           <div className="absolute inset-0 bg-no-repeat bg-center bg-cover" style={{ backgroundImage: `url(${EarthBackground})` }}>
             <div className="w-full h-full bg-white opacity-85"></div>
           </div>
 
-          <div className="relative z-10 bg-red-50 bg-opacity-75 p-8 mt-10 w-full h-4/5 rounded-lg shadow-lg overflow-y-auto">
+          <div className="relative z-10 bg-red-50 bg-opacity-75 p-4 lg:p-8 mt-4 lg:mt-10 w-full min-h-[80%] rounded-lg shadow-lg overflow-y-auto flex flex-col">
 
             {/* ===== LEVEL 1: Classes → Groups → Exercises ===== */}
             {!selectedView ? (
@@ -339,8 +341,8 @@ const Statistics = () => {
 
       {/* ===== LEVEL 3: Submission Detail Popup ===== */}
       {showSubmissionPopup && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl border-2 border-blue-200 overflow-hidden max-h-[85vh] flex flex-col">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl border-2 border-blue-200 overflow-hidden max-h-[90vh] flex flex-col">
             <div className="bg-blue-400 px-6 py-4 flex items-center justify-between">
               <h2 className="text-xl font-bold text-white">
                 {submissionData ? `Bài làm: ${submissionData.student?.fullName}` : 'Đang tải...'}
@@ -348,7 +350,7 @@ const Statistics = () => {
               <button onClick={() => setShowSubmissionPopup(false)} className="text-white hover:text-blue-100"><X size={24} /></button>
             </div>
 
-            <div className="p-6 overflow-y-auto flex-grow bg-blue-50">
+            <div className="p-4 md:p-6 overflow-y-auto flex-grow bg-blue-50 min-h-0">
               {loadingSubmission ? <div className="text-center py-8 text-gray-600">Đang tải...</div> : submissionData ? (
                 <div className="space-y-4">
                   {/* Score summary */}
@@ -399,6 +401,34 @@ const Statistics = () => {
                             })}
                           </div>
                           <p className="text-xs text-gray-400 mt-1">HS chọn: {ans.selectedAnswer} | Đáp án: {ans.itemDetail?.correctAnswer}</p>
+                        </div>
+                      )}
+
+                      {ans.itemType === 'drag_and_drop' && (
+                        <div>
+                          <span className={`text-xs px-2 py-1 rounded-full font-medium ${ans.isCorrect ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                            {ans.isCorrect ? '✅ Đúng' : '❌ Sai'}
+                          </span>
+                          <p className="mt-2 font-medium text-gray-700">{ans.itemDetail?.title}</p>
+                          <div className="mt-2 space-y-2">
+                            {(ans.itemDetail?.matchingPairs || []).map((pair, idx) => {
+                                const studentMatch = (ans.dragAndDropMatches || []).find(m => m.prompt === pair.prompt);
+                                const expected = [...(pair.answers || [])].sort().join(', ');
+                                const submitted = studentMatch ? [...(studentMatch.answers || [])].sort().join(', ') : '';
+                                const isPairCorrect = expected === submitted;
+                                return (
+                                    <div key={idx} className={`p-2 rounded border ${isPairCorrect ? 'bg-green-50 border-green-400' : 'bg-red-50 border-red-400'}`}>
+                                        <div className="font-medium text-sm text-gray-800">{pair.prompt}</div>
+                                        <div className="text-xs mt-1">
+                                            <span className="text-gray-500">Đã chọn:</span> <span className="font-bold">{submitted || '(Trống)'}</span>
+                                            {!isPairCorrect && (
+                                                <span className="ml-3 text-green-600">Đáp án: {expected}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                          </div>
                         </div>
                       )}
 

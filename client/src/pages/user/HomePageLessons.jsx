@@ -65,8 +65,8 @@ const HomePageLessons = () => {
         <div className="w-full h-full bg-white opacity-85"></div>
       </div>
 
-      <div className="flex flex-grow justify-center p-8 relative overflow-y-auto">
-        <div className="bg-white bg-opacity-75 p-8 rounded-lg shadow-lg w-3/5 mr-8 border border-blue-100 h-fit">
+      <div className="flex flex-col flex-grow items-center p-4 lg:p-8 relative overflow-y-auto">
+        <div className="bg-white bg-opacity-75 p-4 lg:p-8 rounded-lg shadow-lg w-full max-w-5xl border border-blue-100 h-fit mb-8">
 
           {groups.map((group, index) => {
             const isExpanded = expandedGroup === group._id;
@@ -79,15 +79,15 @@ const HomePageLessons = () => {
                   onClick={() => toggleGroup(group)}
                   className="flex items-center justify-between cursor-pointer bg-blue-100 hover:bg-blue-200 p-5 rounded-lg shadow-sm transition-all duration-300"
                 >
-                  <div className="flex items-center space-x-3">
-                    <BookOpen size={22} className="text-blue-600" />
-                    <h2 className="text-xl font-bold text-blue-900">
-                      {index + 1}. {group.name}
+                  <div className="flex items-center space-x-3 text-left">
+                    <BookOpen size={22} className="text-blue-600 flex-shrink-0" />
+                    <h2 className="text-xl font-bold text-blue-900 text-left">
+                      {group.name}
                     </h2>
                   </div>
                   {isExpanded
-                    ? <ChevronDown className="text-blue-500" />
-                    : <ChevronRight className="text-blue-500" />
+                    ? <ChevronDown className="text-blue-500 flex-shrink-0 ml-2" />
+                    : <ChevronRight className="text-blue-500 flex-shrink-0 ml-2" />
                   }
                 </div>
 
@@ -103,11 +103,11 @@ const HomePageLessons = () => {
                           onClick={() => navigate(`/lesson/${lesson._id}`)}
                           className="group flex items-center justify-between cursor-pointer bg-white hover:bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg shadow-sm transition-all duration-300 transform hover:-translate-y-1"
                         >
-                          <div className="flex items-center space-x-3">
-                            <span className="text-sm px-2 py-1 rounded-full bg-blue-100 text-blue-700 font-medium">
+                          <div className="flex items-center space-x-3 text-left">
+                            <span className="text-sm px-2 py-1 rounded-full bg-blue-100 text-blue-700 font-medium flex-shrink-0">
                               {lesson.type === 'THEORY' ? '📖' : lesson.type === 'PRACTICE' ? '✍️' : '🎬'}
                             </span>
-                            <span className="text-gray-700 font-medium text-lg">
+                            <span className="text-gray-700 font-medium text-lg text-left line-clamp-2">
                               {lesson.title}
                             </span>
                           </div>
@@ -124,11 +124,6 @@ const HomePageLessons = () => {
           {groups.length === 0 && (
             <div className="text-center text-gray-500 italic">Chưa có bài học nào.</div>
           )}
-
-        </div>
-
-        <div className="w-1/4 flex items-center justify-center sticky top-8 h-fit">
-          <img src={SaveTheEnvironment} alt="Save The Environment" className="max-w-full h-auto drop-shadow-xl" />
         </div>
       </div>
       <ChatBot />

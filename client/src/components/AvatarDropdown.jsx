@@ -45,7 +45,7 @@ const AvatarDropdown = () => {
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex items-center space-x-3 cursor-pointer hover:opacity-80 transition-opacity"
             >
-                <span className="text-gray-800 font-medium text-xl">
+                <span className="hidden md:block text-gray-800 font-medium text-xl">
                     {user?.fullName || 'Tên'}
                 </span>
                 <img

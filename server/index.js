@@ -39,6 +39,7 @@ import documentRoutes from './routes/documents.js';
 import submissionRoutes from './routes/submissions.js';
 import adminRoutes from './routes/admin.js';
 import chatRoutes from './routes/chat.js';
+import uploadRoutes from './routes/upload.js';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/classes', classRoutes);
@@ -49,6 +50,7 @@ app.use('/api/documents', documentRoutes);
 app.use('/api/submissions', submissionRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/upload', uploadRoutes);
 
 // Serve frontend
 app.use(express.static(path.join(__dirname, 'public')));

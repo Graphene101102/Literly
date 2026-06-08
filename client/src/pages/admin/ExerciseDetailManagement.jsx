@@ -17,10 +17,12 @@ const ExerciseDetailManagement = () => {
     <div className="h-screen w-screen flex flex-col bg-blue-50">
       <AdminHeader />
 
-      <div className="flex flex-grow">
-        <Sidebar />
+      <div className="flex flex-col lg:flex-row flex-grow overflow-hidden">
+        <div className="lg:h-full lg:flex-shrink-0 overflow-y-auto lg:overflow-visible max-h-48 lg:max-h-full">
+          <Sidebar />
+        </div>
 
-        <div className="relative flex-grow p-8">
+        <div className="relative flex-grow p-4 lg:p-8 overflow-y-auto">
           <div
             className="absolute inset-0 bg-no-repeat bg-center bg-cover"
             style={{ backgroundImage: `url(${EarthBackground})` }}
@@ -28,7 +30,7 @@ const ExerciseDetailManagement = () => {
             <div className="w-full h-full bg-white opacity-85"></div>
           </div>
 
-          <div className="relative z-10 bg-red-50 bg-opacity-75 p-8 mt-10 w-full h-4/5 rounded-lg shadow-lg">
+          <div className="relative z-10 bg-red-50 bg-opacity-75 p-4 lg:p-8 mt-4 lg:mt-10 w-full min-h-[80%] rounded-lg shadow-lg flex flex-col">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-800">Bài tập</h2>
               <button className="flex items-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-lg">

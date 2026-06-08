@@ -107,7 +107,7 @@ export const createLesson = async (req, res) => {
         const group = await LessonGroup.findById(req.params.id);
         if (!group) return res.status(404).json({ message: 'Không tìm thấy nhóm bài học' });
 
-        const { title, type, content, videoUrl, author, description, order } = req.body;
+        const { title, type, content, videoUrl, imageUrl, author, description, order } = req.body;
 
         if (!title) return res.status(400).json({ message: 'Tiêu đề không được để trống' });
 
@@ -116,6 +116,7 @@ export const createLesson = async (req, res) => {
             type: type || 'THEORY',
             content: content || '',
             videoUrl: videoUrl || '',
+            imageUrl: imageUrl || '',
             author: author || '',
             description: description || '',
             order: order || 0,
@@ -140,6 +141,7 @@ export const updateLesson = async (req, res) => {
         lesson.type = req.body.type ?? lesson.type;
         lesson.content = req.body.content ?? lesson.content;
         lesson.videoUrl = req.body.videoUrl ?? lesson.videoUrl;
+        lesson.imageUrl = req.body.imageUrl ?? lesson.imageUrl;
         lesson.author = req.body.author ?? lesson.author;
         lesson.description = req.body.description ?? lesson.description;
         lesson.order = req.body.order ?? lesson.order;

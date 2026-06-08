@@ -144,7 +144,8 @@ const LessonManagement = () => {
   // ============ LESSON CRUD ============
   const openAddLesson = () => {
     setEditingLesson(null);
-    setLessonForm({ title: '', type: 'THEORY', content: '', videoUrl: '', author: '', description: '', order: 0 });
+    const nextOrder = lessons.length > 0 ? Math.max(...lessons.map(l => l.order || 0)) + 1 : 1;
+    setLessonForm({ title: '', type: 'THEORY', content: '', videoUrl: '', imageUrl: '', author: '', description: '', order: nextOrder });
     setError('');
     setShowLessonPopup(true);
   };
@@ -156,12 +157,30 @@ const LessonManagement = () => {
       type: lesson.type || 'THEORY',
       content: lesson.content || '',
       videoUrl: lesson.videoUrl || '',
+      imageUrl: lesson.imageUrl || '',
       author: lesson.author || '',
       description: lesson.description || '',
       order: lesson.order || 0
     });
     setError('');
     setShowLessonPopup(true);
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    try {
+      const { data } = await api.post('/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setLessonForm(prev => ({ ...prev, imageUrl: data.imageUrl }));
+    } catch (err) {
+      alert('Lỗi khi tải ảnh lên: ' + (err.response?.data?.message || err.message));
+    }
   };
 
   const handleLessonSubmit = async (e) => {
@@ -198,14 +217,16 @@ const LessonManagement = () => {
   return (
     <div className="h-screen w-screen flex flex-col bg-blue-50">
       <AdminHeader />
-      <div className="flex flex-grow">
-        <Sidebar />
-        <div className="relative flex-grow p-8">
+      <div className="flex flex-col lg:flex-row flex-grow overflow-hidden">
+        <div className="lg:h-full lg:flex-shrink-0 overflow-y-auto lg:overflow-visible max-h-48 lg:max-h-full">
+          <Sidebar />
+        </div>
+        <div className="relative flex-grow p-4 lg:p-8 overflow-y-auto">
           <div className="absolute inset-0 bg-no-repeat bg-center bg-cover" style={{ backgroundImage: `url(${EarthBackground})` }}>
             <div className="w-full h-full bg-white opacity-85"></div>
           </div>
 
-          <div className="relative z-10 bg-red-50 bg-opacity-75 p-8 mt-10 w-full h-4/5 rounded-lg shadow-lg overflow-y-auto">
+          <div className="relative z-10 bg-red-50 bg-opacity-75 p-4 lg:p-8 mt-4 lg:mt-10 w-full min-h-[80%] rounded-lg shadow-lg overflow-y-auto flex flex-col">
             {/* ========== GROUP LIST VIEW ========== */}
             {!selectedGroup ? (
               <>
@@ -224,9 +245,9 @@ const LessonManagement = () => {
                     {groups.map((g, index) => (
                       <div key={g._id} className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                         <div className="flex items-center">
-                          <BookOpen size={22} className="text-blue-500 mr-3" />
+                          <BookOpen size={22} className="text-blue-500 mr-3 flex-shrink-0" />
                           <div>
-                            <span className="text-xl font-medium text-gray-800">{index + 1}. {g.name}</span>
+                            <span className="text-xl font-medium text-gray-800">{g.name}</span>
                             {g.allowedClasses && g.allowedClasses.length > 0 && (
                               <div className="text-xs text-gray-500 mt-1">
                                 Lớp: {g.allowedClasses.map(c => c.name).join(', ')}
@@ -277,7 +298,7 @@ const LessonManagement = () => {
                       <div key={lesson._id} className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                         <div>
                           <span className="text-xl font-medium text-gray-800 block">
-                            {index + 1}. {lesson.title}
+                            {lesson.title}
                           </span>
                           <span className="text-sm text-gray-500 ml-6 block">
                             {typeLabels[lesson.type] || lesson.type}
@@ -364,13 +385,37 @@ const LessonManagement = () => {
             className="w-full border border-blue-200 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white" required />
         </div>
         <div>
-          <label className="block text-sm font-semibold text-blue-800 mb-1">Loại</label>
-          <select value={lessonForm.type} onChange={(e) => setLessonForm({ ...lessonForm, type: e.target.value })}
-            className="w-full border border-blue-200 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
-            <option value="THEORY">📖 Lý thuyết</option>
-            <option value="PRACTICE">✍️ Thực hành</option>
-            <option value="VIDEO">🎬 Video</option>
-          </select>
+          <label className="block text-sm font-semibold text-blue-800 mb-1">Link Ảnh (Tùy chọn)</label>
+          <div className="flex space-x-2">
+            <input type="text" value={lessonForm.imageUrl || ''} onChange={(e) => setLessonForm({ ...lessonForm, imageUrl: e.target.value })}
+              placeholder="https://example.com/image.png" className="w-full border border-blue-200 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white" />
+            <label className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-sm cursor-pointer whitespace-nowrap flex items-center">
+              Tải ảnh lên
+              <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+            </label>
+          </div>
+        </div>
+        <div>
+          <label className="block text-sm font-semibold text-blue-800 mb-2">Loại bài học</label>
+          <div className="grid grid-cols-1 gap-2">
+            {[
+              { id: 'THEORY', label: '📖 Lý thuyết' },
+              { id: 'PRACTICE', label: '✍️ Thực hành' },
+              { id: 'VIDEO', label: '🎬 Video' }
+            ].map(type => (
+              <div 
+                key={type.id}
+                onClick={() => setLessonForm({ ...lessonForm, type: type.id })}
+                className={`p-3 rounded-xl border-2 cursor-pointer transition-all flex items-center justify-center text-center select-none ${
+                  lessonForm.type === type.id 
+                  ? 'border-blue-500 bg-blue-50 font-bold text-blue-700 shadow-md transform scale-[1.02]' 
+                  : 'border-gray-200 bg-white hover:border-blue-300 text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <span className="text-base md:text-lg">{type.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
         <div>
           <label className="block text-sm font-semibold text-blue-800 mb-1">Tác giả</label>
@@ -383,11 +428,13 @@ const LessonManagement = () => {
             rows={4} placeholder="Nội dung bài học..."
             className="w-full border border-blue-200 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white resize-y" />
         </div>
-        <div>
-          <label className="block text-sm font-semibold text-blue-800 mb-1">Link Video (nếu có)</label>
-          <input type="text" value={lessonForm.videoUrl} onChange={(e) => setLessonForm({ ...lessonForm, videoUrl: e.target.value })}
-            placeholder="https://youtube.com/..." className="w-full border border-blue-200 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white" />
-        </div>
+        {lessonForm.type === 'VIDEO' && (
+          <div>
+            <label className="block text-sm font-semibold text-blue-800 mb-1">Link Video</label>
+            <input type="text" value={lessonForm.videoUrl} onChange={(e) => setLessonForm({ ...lessonForm, videoUrl: e.target.value })}
+              placeholder="https://youtube.com/..." className="w-full border border-blue-200 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white" />
+          </div>
+        )}
         <div>
           <label className="block text-sm font-semibold text-blue-800 mb-1">Mô tả ngắn</label>
           <input type="text" value={lessonForm.description} onChange={(e) => setLessonForm({ ...lessonForm, description: e.target.value })}

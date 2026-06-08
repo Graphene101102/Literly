@@ -3,7 +3,7 @@ import AdminHeader from '../../components/AdminHeader';
 import Sidebar from '../../components/Sidebar';
 import EarthBackground from '../../assets/earth-background.png';
 import api from '../../services/api';
-import { X, Plus, Pencil, Trash2, ArrowLeft, BookOpen, FileText, CheckSquare, AlignLeft } from 'lucide-react';
+import { X, Plus, Pencil, Trash2, ArrowLeft, BookOpen, FileText, CheckSquare, AlignLeft, MoveHorizontal } from 'lucide-react';
 
 // ================ POPUP ================
 const PopupForm = ({ isOpen, onClose, title, onSubmit, children, wide }) => {
@@ -49,7 +49,7 @@ const ExerciseManagement = () => {
   const [itemForm, setItemForm] = useState({
     title: '', type: 'document', content: '', questionText: '',
     optionA: '', optionB: '', optionC: '', optionD: '', correctAnswer: 'A',
-    essayPrompt: '', order: 0
+    essayPrompt: '', matchingPairs: [{ prompt: '', answerString: '' }], order: 0
   });
 
   const [error, setError] = useState('');
@@ -87,7 +87,13 @@ const ExerciseManagement = () => {
   const goBackToExercises = () => { setSelectedExercise(null); setItems([]); };
 
   // ============ BIG EXERCISE CRUD ============
-  const openAddEx = () => { setEditingEx(null); setExForm({ title: '', order: 0 }); setError(''); setShowExPopup(true); };
+  const openAddEx = () => { 
+    setEditingEx(null); 
+    const nextOrder = exercises.length > 0 ? Math.max(...exercises.map(ex => ex.order || 0)) + 1 : 1;
+    setExForm({ title: '', order: nextOrder }); 
+    setError(''); 
+    setShowExPopup(true); 
+  };
   const openEditEx = (ex) => { setEditingEx(ex); setExForm({ title: ex.title, order: ex.order || 0 }); setError(''); setShowExPopup(true); };
 
   const handleExSubmit = async (e) => {
@@ -117,31 +123,61 @@ const ExerciseManagement = () => {
   // ============ ITEM CRUD ============
   const openAddItem = () => {
     setEditingItem(null);
-    setItemForm({ title: '', type: 'document', content: '', questionText: '', optionA: '', optionB: '', optionC: '', optionD: '', correctAnswer: 'A', essayPrompt: '', order: 0 });
+    const nextOrder = items.length > 0 ? Math.max(...items.map(it => it.order || 0)) + 1 : 1;
+    setItemForm({ title: '', imageUrl: '', type: 'document', content: '', questionText: '', optionA: '', optionB: '', optionC: '', optionD: '', correctAnswer: 'A', essayPrompt: '', matchingPairs: [{ prompt: '', answerString: '' }], order: nextOrder });
     setError(''); setShowItemPopup(true);
   };
 
   const openEditItem = (item) => {
     setEditingItem(item);
     setItemForm({
-      title: item.title || '', type: item.type || 'document',
+      title: item.title || '', imageUrl: item.imageUrl || '', type: item.type || 'document',
       content: item.content || '', questionText: item.questionText || '',
       optionA: item.optionA || '', optionB: item.optionB || '',
       optionC: item.optionC || '', optionD: item.optionD || '',
       correctAnswer: item.correctAnswer || 'A',
-      essayPrompt: item.essayPrompt || '', order: item.order || 0
+      essayPrompt: item.essayPrompt || '', 
+      matchingPairs: item.matchingPairs?.length > 0 
+        ? item.matchingPairs.map(p => ({ prompt: p.prompt, answerString: p.answers?.join('\n') || '' }))
+        : [{ prompt: '', answerString: '' }],
+      order: item.order || 0
     });
     setError(''); setShowItemPopup(true);
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    try {
+      const { data } = await api.post('/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setItemForm(prev => ({ ...prev, imageUrl: data.imageUrl }));
+    } catch (err) {
+      alert('Lỗi khi tải ảnh lên: ' + (err.response?.data?.message || err.message));
+    }
   };
 
   const handleItemSubmit = async (e) => {
     e.preventDefault(); setError('');
     try {
+      const payload = { ...itemForm };
+      if (payload.type === 'drag_and_drop' || payload.type === 'match_columns') {
+          payload.matchingPairs = payload.matchingPairs.map(p => ({
+              prompt: p.prompt,
+              answers: (p.answerString || '').split('\n').map(s => s.trim()).filter(s => s)
+          }));
+      }
+
       if (editingItem) {
-        const { data } = await api.put(`/exercises/${selectedExercise._id}/items/${editingItem._id}`, itemForm);
+        const { data } = await api.put(`/exercises/${selectedExercise._id}/items/${editingItem._id}`, payload);
         setItems(items.map(it => it._id === editingItem._id ? data : it));
       } else {
-        const { data } = await api.post(`/exercises/${selectedExercise._id}/items`, itemForm);
+        const { data } = await api.post(`/exercises/${selectedExercise._id}/items`, payload);
         setItems([...items, data]);
       }
       setShowItemPopup(false);
@@ -159,11 +195,12 @@ const ExerciseManagement = () => {
 
   // ============ HELPERS ============
   const typeIcons = {
-    document: <FileText size={18} className="text-blue-500" />,
-    multiple_choice: <CheckSquare size={18} className="text-green-500" />,
-    essay: <AlignLeft size={18} className="text-purple-500" />
+    document: <FileText size={18} className="text-blue-500 flex-shrink-0" />,
+    multiple_choice: <CheckSquare size={18} className="text-green-500 flex-shrink-0" />,
+    essay: <AlignLeft size={18} className="text-purple-500 flex-shrink-0" />,
+    drag_and_drop: <MoveHorizontal size={18} className="text-orange-500 flex-shrink-0" />
   };
-  const typeNames = { document: 'Tài liệu', multiple_choice: 'Trắc nghiệm', essay: 'Tự luận' };
+  const typeNames = { document: 'Tài liệu', multiple_choice: 'Trắc nghiệm', essay: 'Tự luận', drag_and_drop: 'Kéo thả' };
 
   // ============ DETERMINE CURRENT VIEW ============
   const currentView = selectedExercise ? 'items' : selectedGroup ? 'exercises' : 'groups';
@@ -171,14 +208,16 @@ const ExerciseManagement = () => {
   return (
     <div className="h-screen w-screen flex flex-col bg-blue-50">
       <AdminHeader />
-      <div className="flex flex-grow">
-        <Sidebar />
-        <div className="relative flex-grow p-8">
+      <div className="flex flex-col lg:flex-row flex-grow overflow-hidden">
+        <div className="lg:h-full lg:flex-shrink-0 overflow-y-auto lg:overflow-visible max-h-48 lg:max-h-full">
+          <Sidebar />
+        </div>
+        <div className="relative flex-grow p-4 lg:p-8 overflow-y-auto">
           <div className="absolute inset-0 bg-no-repeat bg-center bg-cover" style={{ backgroundImage: `url(${EarthBackground})` }}>
             <div className="w-full h-full bg-white opacity-85"></div>
           </div>
 
-          <div className="relative z-10 bg-red-50 bg-opacity-75 p-8 mt-10 w-full h-4/5 rounded-lg shadow-lg overflow-y-auto">
+          <div className="relative z-10 bg-red-50 bg-opacity-75 p-4 lg:p-8 mt-4 lg:mt-10 w-full min-h-[80%] rounded-lg shadow-lg overflow-y-auto flex flex-col">
 
             {/* ===== LEVEL 1: GROUPS ===== */}
             {currentView === 'groups' && (
@@ -191,8 +230,8 @@ const ExerciseManagement = () => {
                     {groups.map((g, i) => (
                       <div key={g._id} className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                         <div className="flex items-center">
-                          <BookOpen size={22} className="text-blue-500 mr-3" />
-                          <span className="text-xl font-medium text-gray-800">{i + 1}. {g.name}</span>
+                          <BookOpen size={22} className="text-blue-500 mr-3 flex-shrink-0" />
+                          <span className="text-xl font-medium text-gray-800">{g.name}</span>
                         </div>
                         <button onClick={() => openGroupExercises(g)} className="bg-yellow-400 hover:bg-yellow-500 text-white p-2 rounded-full shadow-md transition-transform hover:scale-110" title="Xem bài tập">
                           <BookOpen size={18} />
@@ -222,7 +261,7 @@ const ExerciseManagement = () => {
                     {exercises.map((ex, i) => (
                       <div key={ex._id} className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                         <div className="flex items-center">
-                          <span className="text-xl font-medium text-gray-800">{i + 1}. {ex.title}</span>
+                          <span className="text-xl font-medium text-gray-800">{ex.title}</span>
                         </div>
                         <div className="flex space-x-3">
                           <button onClick={() => openEditEx(ex)} className="bg-blue-400 hover:bg-blue-500 text-white p-2 rounded-full shadow-md transition-transform hover:scale-110"><Pencil size={18} /></button>
@@ -256,7 +295,7 @@ const ExerciseManagement = () => {
                         <div>
                           <span className="text-xl font-medium text-gray-800 flex items-center">
                             {typeIcons[item.type]}
-                            <span className="ml-2">{i + 1}. {item.title}</span>
+                            <span className="ml-2">{item.title}</span>
                           </span>
                           <span className="text-sm text-gray-500 ml-7 block">{typeNames[item.type]}</span>
                         </div>
@@ -305,13 +344,40 @@ const ExerciseManagement = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-blue-800 mb-1">Loại</label>
-          <select value={itemForm.type} onChange={(e) => setItemForm({ ...itemForm, type: e.target.value })}
-            className="w-full border border-blue-200 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white">
-            <option value="document">📄 Tài liệu (không tính điểm)</option>
-            <option value="multiple_choice">✅ Trắc nghiệm (1 câu, 4 đáp án)</option>
-            <option value="essay">📝 Tự luận</option>
-          </select>
+          <label className="block text-sm font-semibold text-blue-800 mb-1">Link Ảnh (Tùy chọn)</label>
+          <div className="flex space-x-2">
+            <input type="text" value={itemForm.imageUrl || ''} onChange={(e) => setItemForm({ ...itemForm, imageUrl: e.target.value })}
+              placeholder="https://example.com/image.png" className="w-full border border-blue-200 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white" />
+            <label className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow-sm cursor-pointer whitespace-nowrap flex items-center">
+              Tải ảnh lên
+              <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold text-blue-800 mb-2">Loại bài tập</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {[
+              { id: 'document', label: '📄 Tài liệu (không tính điểm)' },
+              { id: 'multiple_choice', label: '✅ Trắc nghiệm (1 câu, 4 đáp án)' },
+              { id: 'essay', label: '📝 Tự luận' },
+              { id: 'drag_and_drop', label: '🧩 Kéo thả đáp án' },
+              { id: 'match_columns', label: '🔗 Nối cột (1-1)' }
+            ].map(type => (
+              <div 
+                key={type.id}
+                onClick={() => setItemForm({ ...itemForm, type: type.id })}
+                className={`p-3 rounded-xl border-2 cursor-pointer transition-all flex items-center justify-center text-center select-none ${
+                  itemForm.type === type.id 
+                  ? 'border-blue-500 bg-blue-50 font-bold text-blue-700 shadow-md transform scale-[1.02]' 
+                  : 'border-gray-200 bg-white hover:border-blue-300 text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <span className="text-base md:text-lg">{type.label}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Document */}
@@ -372,6 +438,51 @@ const ExerciseManagement = () => {
             <label className="block text-sm font-semibold text-blue-800 mb-1">Đề bài tự luận</label>
             <textarea value={itemForm.essayPrompt} onChange={(e) => setItemForm({ ...itemForm, essayPrompt: e.target.value })}
               rows={5} placeholder="Đề bài..." className="w-full border border-blue-200 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white resize-y" required />
+          </div>
+        )}
+
+        {/* Drag and Drop & Match Columns */}
+        {(itemForm.type === 'drag_and_drop' || itemForm.type === 'match_columns') && (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <label className="block text-sm font-semibold text-blue-800">Các cặp Đề - Đáp án</label>
+              <button type="button" onClick={() => setItemForm({ ...itemForm, matchingPairs: [...itemForm.matchingPairs, { prompt: '', answerString: '' }] })} className="text-sm bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded-lg shadow-sm font-bold flex items-center">
+                <Plus size={16} className="mr-1" /> Thêm đề
+              </button>
+            </div>
+            {itemForm.matchingPairs.map((pair, idx) => (
+              <div key={idx} className="flex space-x-2 items-start bg-white p-3 rounded-lg border border-gray-200 relative">
+                <div className="flex-grow space-y-2">
+                  <input type="text" value={pair.prompt} onChange={(e) => {
+                    const newPairs = [...itemForm.matchingPairs];
+                    newPairs[idx].prompt = e.target.value;
+                    setItemForm({ ...itemForm, matchingPairs: newPairs });
+                  }} placeholder="Đề bài (Cột trái)..." className="w-full border border-blue-200 p-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white" required />
+                  {itemForm.type === 'match_columns' ? (
+                      <input type="text" value={pair.answerString} onChange={(e) => {
+                        const newPairs = [...itemForm.matchingPairs];
+                        newPairs[idx].answerString = e.target.value;
+                        setItemForm({ ...itemForm, matchingPairs: newPairs });
+                      }} placeholder="Đáp án đúng (Cột phải)..." className="w-full border border-green-200 p-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-400 bg-white" required />
+                  ) : (
+                      <textarea value={pair.answerString} onChange={(e) => {
+                        const newPairs = [...itemForm.matchingPairs];
+                        newPairs[idx].answerString = e.target.value;
+                        setItemForm({ ...itemForm, matchingPairs: newPairs });
+                      }} placeholder="Các đáp án đúng (Mỗi đáp án 1 dòng)..." rows={3} className="w-full border border-green-200 p-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-400 bg-white resize-y" required />
+                  )}
+                </div>
+                {itemForm.matchingPairs.length > 1 && (
+                  <button type="button" onClick={() => {
+                    const newPairs = [...itemForm.matchingPairs];
+                    newPairs.splice(idx, 1);
+                    setItemForm({ ...itemForm, matchingPairs: newPairs });
+                  }} className="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-colors flex-shrink-0 mt-1">
+                    <Trash2 size={18} />
+                  </button>
+                )}
+              </div>
+            ))}
           </div>
         )}
 

@@ -81,38 +81,39 @@ const AuthScreen = () => {
       </div>
 
 
-      <div className="relative z-10 flex items-center justify-between w-full h-full pt-40 pl-20 pr-20 pointer-events-none">
+      <div className="relative z-10 w-full h-full pt-16 pointer-events-none overflow-hidden">
+        
         {/* Content container needs pointer-events-auto */}
-        <div className="flex flex-col items-center w-2/3 pr-8 z-50 pointer-events-auto">
-          <img src={LiterlyLogo} alt="Literly Logo" className="w-100 mb-4" />
+        <div className="absolute top-[40%] xl:top-[45%] left-0 right-0 xl:right-auto px-4 md:px-12 xl:px-0 xl:left-[18%] -translate-y-1/2 flex flex-col items-center justify-center w-full xl:max-w-[1000px] z-50 pointer-events-auto">
+          <img src={LiterlyLogo} alt="Literly Logo" className="w-[85%] md:w-[70%] xl:w-[100%] max-w-[1000px] mb-4 xl:mb-8 drop-shadow-sm" />
 
-          <h1 className="text-4xl font-bold text-green-800 mt-12 mb-8 text-center">
+          <h1 className="text-lg md:text-2xl xl:text-[32px] font-bold text-green-800 mb-6 xl:mb-10 text-center tracking-wide">
             Bài 10: TRÁI ĐẤT - NGÔI NHÀ CHUNG
           </h1>
 
           {!showForm ? (
-            <div className="flex space-x-6 pt-8 relative z-[100]">
+            <div className="flex flex-row items-center justify-center space-x-3 xl:space-x-6 w-full">
               <button
                 onClick={() => handleButtonClick('login')}
-                className="bg-blue-500 hover:bg-blue-600 text-white font-bold text-2xl py-5 px-16 rounded-xl shadow-lg transition-transform hover:scale-105 cursor-pointer relative z-[100]"
+                className="bg-[#3b82f6] hover:bg-blue-600 text-white font-bold text-sm md:text-base xl:text-xl py-2.5 px-6 xl:py-3 xl:px-10 rounded shadow-sm transition-all whitespace-nowrap min-w-[110px] xl:min-w-[160px]"
               >
                 Đăng nhập
               </button>
               <button
                 onClick={() => handleButtonClick('register')}
-                className="bg-blue-500 hover:bg-blue-600 text-white font-bold text-2xl py-5 px-16 rounded-xl shadow-lg transition-transform hover:scale-105 cursor-pointer relative z-[100]"
+                className="bg-[#3b82f6] hover:bg-blue-600 text-white font-bold text-sm md:text-base xl:text-xl py-2.5 px-6 xl:py-3 xl:px-10 rounded shadow-sm transition-all whitespace-nowrap min-w-[110px] xl:min-w-[160px]"
               >
                 Đăng ký
               </button>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col space-y-4 w-full max-w-md bg-white p-8 rounded-xl shadow-2xl mt-4 border border-blue-200">
-              <h2 className="text-2xl font-bold text-center text-blue-900 mb-4">
-                {isLogin ? 'Đăng Nhập' : 'Đăng Ký Học Sinh Mới'}
+            <form onSubmit={handleSubmit} className="flex flex-col space-y-4 w-full max-w-[320px] bg-white p-6 rounded-2xl shadow-xl border border-blue-100 mt-4">
+              <h2 className="text-xl md:text-2xl font-bold text-center text-blue-900 mb-2">
+                {isLogin ? 'Đăng Nhập' : 'Đăng Ký Mới'}
               </h2>
 
               {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-center">
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-center text-sm font-medium">
                   {error}
                 </div>
               )}
@@ -122,13 +123,13 @@ const AuthScreen = () => {
                   <input
                     type="text"
                     placeholder="Họ và tên"
-                    className="border p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="border border-gray-300 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 focus:bg-white transition-colors"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required
                   />
                   <select
-                    className="border p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    className="border border-gray-300 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 focus:bg-white transition-colors"
                     value={classId}
                     onChange={(e) => setClassId(e.target.value)}
                     required
@@ -144,7 +145,7 @@ const AuthScreen = () => {
               <input
                 type="text"
                 placeholder="Tên đăng nhập"
-                className="border p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border border-gray-300 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 focus:bg-white transition-colors"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
@@ -154,14 +155,14 @@ const AuthScreen = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Mật khẩu"
-                  className="border p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+                  className="border border-gray-300 p-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 focus:bg-white transition-colors pr-12"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700 focus:outline-none"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-blue-500 transition-colors focus:outline-none"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
@@ -179,7 +180,7 @@ const AuthScreen = () => {
 
               <button
                 type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md transition-colors mt-2"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all hover:scale-105 mt-2"
               >
                 {isLogin ? 'Vào học ngay' : 'Tạo tài khoản'}
               </button>
@@ -187,7 +188,7 @@ const AuthScreen = () => {
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="text-gray-500 hover:text-gray-700 text-sm mt-2 text-center underline"
+                className="text-gray-500 hover:text-blue-600 font-medium text-sm mt-3 text-center transition-colors"
               >
                 Quay lại
               </button>
@@ -196,9 +197,11 @@ const AuthScreen = () => {
 
         </div>
 
-        <div className="w-1/2 flex justify-end">
-          <img src={EarthWhale} alt="Earth Whale" className="w-[500px] drop-shadow-2xl" />
+        {/* Floating Whale Decoration (Desktop Only) */}
+        <div className="hidden xl:block absolute right-16 top-[55%] -translate-y-1/2 pointer-events-none z-0">
+          <img src={EarthWhale} alt="Earth Whale" className="w-[450px] drop-shadow-xl opacity-95 animate-[bounce_4s_ease-in-out_infinite]" />
         </div>
+
       </div>
     </div>
   );

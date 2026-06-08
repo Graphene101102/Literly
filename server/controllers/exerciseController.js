@@ -80,7 +80,7 @@ export const createExerciseItem = async (req, res) => {
         const exercise = await Exercise.findById(req.params.id);
         if (!exercise) return res.status(404).json({ message: 'Không tìm thấy bài tập lớn' });
 
-        const { title, type, content, questionText, optionA, optionB, optionC, optionD, correctAnswer, essayPrompt, order } = req.body;
+        const { title, type, content, imageUrl, questionText, optionA, optionB, optionC, optionD, correctAnswer, essayPrompt, matchingPairs, order } = req.body;
         if (!title) return res.status(400).json({ message: 'Tiêu đề không được để trống' });
         if (!type) return res.status(400).json({ message: 'Loại bài tập không được để trống' });
 
@@ -88,11 +88,13 @@ export const createExerciseItem = async (req, res) => {
             exercise: exercise._id,
             title, type,
             content: content || '',
+            imageUrl: imageUrl || '',
             questionText: questionText || '',
             optionA: optionA || '', optionB: optionB || '',
             optionC: optionC || '', optionD: optionD || '',
             correctAnswer: correctAnswer || '',
             essayPrompt: essayPrompt || '',
+            matchingPairs: matchingPairs || [],
             order: order || 0
         });
         res.status(201).json(item);
@@ -110,6 +112,7 @@ export const updateExerciseItem = async (req, res) => {
         item.title = req.body.title ?? item.title;
         item.type = req.body.type ?? item.type;
         item.content = req.body.content ?? item.content;
+        item.imageUrl = req.body.imageUrl ?? item.imageUrl;
         item.questionText = req.body.questionText ?? item.questionText;
         item.optionA = req.body.optionA ?? item.optionA;
         item.optionB = req.body.optionB ?? item.optionB;
@@ -117,6 +120,7 @@ export const updateExerciseItem = async (req, res) => {
         item.optionD = req.body.optionD ?? item.optionD;
         item.correctAnswer = req.body.correctAnswer ?? item.correctAnswer;
         item.essayPrompt = req.body.essayPrompt ?? item.essayPrompt;
+        item.matchingPairs = req.body.matchingPairs ?? item.matchingPairs;
         item.order = req.body.order ?? item.order;
 
         const updated = await item.save();

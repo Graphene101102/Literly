@@ -36,6 +36,10 @@ const LessonSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    imageUrl: {
+        type: String,
+        default: ''
+    },
     description: {
         type: String,
         default: ''

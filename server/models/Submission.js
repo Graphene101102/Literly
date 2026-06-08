@@ -8,12 +8,17 @@ const AnswerSchema = new mongoose.Schema({
     },
     itemType: {
         type: String,
-        enum: ['document', 'multiple_choice', 'essay'],
+        enum: ['document', 'multiple_choice', 'essay', 'drag_and_drop', 'match_columns'],
         required: true
     },
     // Trắc nghiệm
     selectedAnswer: { type: String, default: '' },
     isCorrect: { type: Boolean, default: false },
+    // Kéo thả & Nối cột
+    dragAndDropMatches: [{
+        prompt: { type: String },
+        answers: [{ type: String }]
+    }],
     // Tự luận
     essayAnswer: { type: String, default: '' },
     essayScore: { type: Number, default: null } // null = chưa chấm

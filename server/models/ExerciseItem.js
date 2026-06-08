@@ -14,7 +14,7 @@ const ExerciseItemSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ['document', 'multiple_choice', 'essay'],
+        enum: ['multiple_choice', 'essay', 'document', 'drag_and_drop', 'match_columns'],
         required: true
     },
     // Dùng cho document: nội dung đọc
@@ -41,6 +41,15 @@ const ExerciseItemSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    imageUrl: {
+        type: String,
+        default: ''
+    },
+    // Dùng cho drag_and_drop: danh sách cặp đề - đáp án
+    matchingPairs: [{
+        prompt: { type: String, required: true },
+        answers: [{ type: String, required: true }]
+    }],
     order: {
         type: Number,
         default: 0
