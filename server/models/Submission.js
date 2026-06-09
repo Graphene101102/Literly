@@ -21,6 +21,7 @@ const AnswerSchema = new mongoose.Schema({
     }],
     // Tự luận
     essayAnswer: { type: String, default: '' },
+    essayImage: { type: String, default: '' },
     essayScore: { type: Number, default: null } // null = chưa chấm
 });
 

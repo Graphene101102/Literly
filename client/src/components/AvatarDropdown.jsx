@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Settings, LogOut } from 'lucide-react';
-import DefaultAvatar from '../assets/user-avatar.png';
+import DefaultAvatar from '../assets/avatar-default.jpg';
 import SettingsModal from './SettingsModal';
 
 const API_BASE = import.meta.env.MODE === 'production' ? '' : 'http://localhost:5001';

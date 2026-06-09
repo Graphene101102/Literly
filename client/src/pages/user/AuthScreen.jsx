@@ -198,7 +198,7 @@ const AuthScreen = () => {
         </div>
 
         {/* Floating Whale Decoration (Desktop Only) */}
-        <div className="hidden xl:block absolute right-16 top-[55%] -translate-y-1/2 pointer-events-none z-0">
+        <div className="hidden xl:block absolute right-16 top-[65%] -translate-y-1/2 pointer-events-none z-0">
           <img src={EarthWhale} alt="Earth Whale" className="w-[450px] drop-shadow-xl opacity-95 animate-[bounce_4s_ease-in-out_infinite]" />
         </div>
 

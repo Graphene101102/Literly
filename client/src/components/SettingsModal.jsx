@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, Camera } from 'lucide-react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import DefaultAvatar from '../assets/user-avatar.png';
+import DefaultAvatar from '../assets/avatar-default.jpg';
 
 const API_BASE = import.meta.env.MODE === 'production' ? '' : 'http://localhost:5001';
 

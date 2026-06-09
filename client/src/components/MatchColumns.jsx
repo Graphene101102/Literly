@@ -146,7 +146,7 @@ const MatchColumns = ({ item, shuffledAnswers, userMatches, onMatch, submitted }
                 key={idx}
                 ref={el => leftRefs.current[pair.prompt] = el}
                 onClick={() => handleLeftClick(pair.prompt)}
-                className={`p-4 rounded-xl border-2 text-center transition-all cursor-pointer shadow-sm
+                className={`p-4 rounded-xl border-2 text-left transition-all cursor-pointer shadow-sm
                   ${submitted ? 'bg-gray-50 border-gray-300 opacity-90' :
                     selectedLeft === pair.prompt ? 'bg-blue-100 border-blue-500 animate-pulse' :
                     hasMatch ? 'bg-indigo-50 border-indigo-300' :
@@ -177,7 +177,7 @@ const MatchColumns = ({ item, shuffledAnswers, userMatches, onMatch, submitted }
                         handleRightClick(ans);
                     }
                 }}
-                className={`p-4 rounded-xl border-2 text-center transition-all cursor-pointer shadow-sm
+                className={`p-4 rounded-xl border-2 text-left transition-all cursor-pointer shadow-sm
                   ${submitted ? 'bg-gray-50 border-gray-300 opacity-90' :
                     selectedRight === ans ? 'bg-orange-100 border-orange-500 animate-pulse' :
                     isMatched ? 'bg-indigo-50 border-indigo-300 relative' :

@@ -2,7 +2,7 @@ import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import LiterlyLogoSmall from '../assets/literly-logo-small.png'; // Smaller logo for header
 import EarthGlobeIcon from '../assets/earth-globe-icon.png'; // Earth globe icon
-import UserAvatar from '../assets/user-avatar.png'; // User avatar
+import UserAvatar from '../assets/avatar-default.jpg'; // User avatar
 
 const Header = () => {
   const location = useLocation();

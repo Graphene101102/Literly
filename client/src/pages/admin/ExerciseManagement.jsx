@@ -4,6 +4,7 @@ import Sidebar from '../../components/Sidebar';
 import EarthBackground from '../../assets/earth-background.png';
 import api from '../../services/api';
 import { X, Plus, Pencil, Trash2, ArrowLeft, BookOpen, FileText, CheckSquare, AlignLeft, MoveHorizontal } from 'lucide-react';
+import RichTextEditor from '../../components/RichTextEditor';
 
 // ================ POPUP ================
 const PopupForm = ({ isOpen, onClose, title, onSubmit, children, wide }) => {
@@ -166,11 +167,29 @@ const ExerciseManagement = () => {
     e.preventDefault(); setError('');
     try {
       const payload = { ...itemForm };
-      if (payload.type === 'drag_and_drop' || payload.type === 'match_columns') {
+      
+      if (payload.type !== 'drag_and_drop' && payload.type !== 'match_columns') {
+          delete payload.matchingPairs;
+      } else {
           payload.matchingPairs = payload.matchingPairs.map(p => ({
               prompt: p.prompt,
               answers: (p.answerString || '').split('\n').map(s => s.trim()).filter(s => s)
           }));
+      }
+
+      if (payload.type !== 'multiple_choice') {
+          delete payload.questionText;
+          delete payload.optionA;
+          delete payload.optionB;
+          delete payload.optionC;
+          delete payload.optionD;
+          delete payload.correctAnswer;
+      }
+      if (payload.type !== 'essay') {
+          delete payload.essayPrompt;
+      }
+      if (payload.type !== 'document') {
+          delete payload.content;
       }
 
       if (editingItem) {
@@ -384,8 +403,12 @@ const ExerciseManagement = () => {
         {itemForm.type === 'document' && (
           <div>
             <label className="block text-sm font-semibold text-blue-800 mb-1">Nội dung tài liệu</label>
-            <textarea value={itemForm.content} onChange={(e) => setItemForm({ ...itemForm, content: e.target.value })}
-              rows={5} placeholder="Nội dung tài liệu..." className="w-full border border-blue-200 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white resize-y" />
+            <RichTextEditor 
+              value={itemForm.content} 
+              onChange={(html) => setItemForm({ ...itemForm, content: html })}
+              placeholder="Nội dung tài liệu (hỗ trợ in đậm, in nghiêng, gạch chân)..." 
+              className="border-blue-200 focus-within:ring-2 focus-within:ring-blue-400" 
+            />
           </div>
         )}
 
@@ -394,8 +417,12 @@ const ExerciseManagement = () => {
           <div className="space-y-3">
             <div>
               <label className="block text-sm font-semibold text-blue-800 mb-1">Câu hỏi</label>
-              <input type="text" value={itemForm.questionText} onChange={(e) => setItemForm({ ...itemForm, questionText: e.target.value })}
-                placeholder="Nội dung câu hỏi..." className="w-full border border-blue-200 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white" required />
+              <RichTextEditor 
+                value={itemForm.questionText} 
+                onChange={(html) => setItemForm({ ...itemForm, questionText: html })}
+                placeholder="Nội dung câu hỏi (hỗ trợ in đậm, in nghiêng, gạch chân)..." 
+                className="border-blue-200 focus-within:ring-2 focus-within:ring-blue-400" 
+              />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -436,8 +463,12 @@ const ExerciseManagement = () => {
         {itemForm.type === 'essay' && (
           <div>
             <label className="block text-sm font-semibold text-blue-800 mb-1">Đề bài tự luận</label>
-            <textarea value={itemForm.essayPrompt} onChange={(e) => setItemForm({ ...itemForm, essayPrompt: e.target.value })}
-              rows={5} placeholder="Đề bài..." className="w-full border border-blue-200 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white resize-y" required />
+            <RichTextEditor 
+              value={itemForm.essayPrompt} 
+              onChange={(html) => setItemForm({ ...itemForm, essayPrompt: html })}
+              placeholder="Đề bài (hỗ trợ in đậm, in nghiêng, gạch chân)..." 
+              className="border-blue-200 focus-within:ring-2 focus-within:ring-blue-400" 
+            />
           </div>
         )}
 

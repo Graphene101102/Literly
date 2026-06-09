@@ -49,6 +49,7 @@ export const submitExercise = async (req, res) => {
                     exerciseItem: item._id,
                     itemType: 'essay',
                     essayAnswer: ans?.essayAnswer || '',
+                    essayImage: ans?.essayImage || '',
                     essayScore: null
                 });
             } else if (item.type === 'document') {

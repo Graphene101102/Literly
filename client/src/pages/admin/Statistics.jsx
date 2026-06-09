@@ -387,7 +387,7 @@ const Statistics = () => {
                           <span className={`text-xs px-2 py-1 rounded-full font-medium ${ans.isCorrect ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                             {ans.isCorrect ? '✅ Đúng' : '❌ Sai'}
                           </span>
-                          <p className="mt-2 font-medium text-gray-700">{ans.itemDetail?.questionText}</p>
+                          <div className="mt-2 font-medium text-gray-700" dangerouslySetInnerHTML={{ __html: ans.itemDetail?.questionText }} />
                           <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
                             {['A', 'B', 'C', 'D'].map(key => {
                               const text = ans.itemDetail?.[`option${key}`];
@@ -435,10 +435,22 @@ const Statistics = () => {
                       {ans.itemType === 'essay' && (
                         <div>
                           <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium">📝 Tự luận</span>
-                          <p className="mt-2 font-medium text-gray-700">Đề: {ans.itemDetail?.essayPrompt}</p>
+                          <div className="mt-2 font-medium text-gray-700 flex">
+                            <span className="mr-1">Đề:</span>
+                            <div dangerouslySetInnerHTML={{ __html: ans.itemDetail?.essayPrompt }} />
+                          </div>
                           <div className="mt-2 bg-gray-50 p-3 rounded-lg border border-gray-200">
                             <p className="text-sm text-gray-400 mb-1">Bài làm:</p>
-                            <p className="text-gray-800 whitespace-pre-wrap">{ans.essayAnswer || <em className="text-gray-400">Không có</em>}</p>
+                            {ans.essayAnswer ? (
+                              <div className="text-gray-800" dangerouslySetInnerHTML={{ __html: ans.essayAnswer }} />
+                            ) : (!ans.essayImage && <em className="text-gray-400">Không có</em>)}
+                            {ans.essayImage && (
+                              <div className="mt-3">
+                                <a href={ans.essayImage} target="_blank" rel="noreferrer">
+                                  <img src={ans.essayImage} alt="Bài làm" className="max-h-[400px] rounded-lg border border-gray-300 shadow-sm hover:opacity-90 cursor-zoom-in transition-opacity" />
+                                </a>
+                              </div>
+                            )}
                           </div>
                           <div className="mt-3 flex items-center space-x-3">
                             <label className="text-sm font-semibold text-purple-700">Điểm (0-10):</label>

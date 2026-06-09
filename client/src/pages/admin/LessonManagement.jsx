@@ -4,6 +4,7 @@ import Sidebar from '../../components/Sidebar';
 import EarthBackground from '../../assets/earth-background.png';
 import api from '../../services/api';
 import { X, Plus, Pencil, Trash2, ArrowLeft, BookOpen } from 'lucide-react';
+import RichTextEditor from '../../components/RichTextEditor';
 
 // ================ POPUP COMPONENT ================
 const PopupForm = ({ isOpen, onClose, title, onSubmit, children }) => {
@@ -424,9 +425,12 @@ const LessonManagement = () => {
         </div>
         <div>
           <label className="block text-sm font-semibold text-blue-800 mb-1">Nội dung</label>
-          <textarea value={lessonForm.content} onChange={(e) => setLessonForm({ ...lessonForm, content: e.target.value })}
-            rows={4} placeholder="Nội dung bài học..."
-            className="w-full border border-blue-200 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white resize-y" />
+          <RichTextEditor 
+            value={lessonForm.content} 
+            onChange={(html) => setLessonForm({ ...lessonForm, content: html })}
+            placeholder="Nội dung bài học (hỗ trợ in đậm, in nghiêng, gạch chân)..." 
+            className="border-blue-200 focus-within:ring-2 focus-within:ring-blue-400" 
+          />
         </div>
         {lessonForm.type === 'VIDEO' && (
           <div>

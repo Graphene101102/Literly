@@ -3,9 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import UserHeader from '../../components/UserHeader';
 import ChatBot from '../../components/ChatBot';
 import EarthBackground from '../../assets/earth-background.png';
-import { ArrowLeft, FileText, CheckSquare, AlignLeft, Send, Link as LinkIcon } from 'lucide-react';
+import { ArrowLeft, FileText, CheckSquare, AlignLeft, Send, Link as LinkIcon, Camera, X } from 'lucide-react';
 import api from '../../services/api';
 import MatchColumns from '../../components/MatchColumns';
+import RichTextEditor from '../../components/RichTextEditor';
 
 const ExerciseDetail = () => {
   const { id } = useParams();
@@ -51,6 +52,7 @@ const ExerciseDetail = () => {
             populatedAnswers[ans.exerciseItem] = {
                 selectedAnswer: ans.selectedAnswer,
                 essayAnswer: ans.essayAnswer,
+                essayImage: ans.essayImage,
                 dragAndDropMatches: ans.dragAndDropMatches,
                 isCorrect: ans.isCorrect,
                 essayScore: ans.essayScore
@@ -73,6 +75,24 @@ const ExerciseDetail = () => {
 
   const handleEssayAnswer = (itemId, text) => {
     setAnswers(prev => ({ ...prev, [itemId]: { ...prev[itemId], essayAnswer: text } }));
+  };
+
+  const handleEssayImageUpload = async (itemId, file) => {
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('image', file);
+    try {
+      const { data } = await api.post('/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setAnswers(prev => ({ ...prev, [itemId]: { ...prev[itemId], essayImage: data.imageUrl } }));
+    } catch (error) {
+      alert('Lỗi tải ảnh lên: ' + (error.response?.data?.message || error.message));
+    }
+  };
+
+  const removeEssayImage = (itemId) => {
+    setAnswers(prev => ({ ...prev, [itemId]: { ...prev[itemId], essayImage: '' } }));
   };
 
   const handleDragAndDropMatch = (itemId, prompt, action, answerStr) => {
@@ -133,7 +153,7 @@ const ExerciseDetail = () => {
   const matchItems = items.filter(i => i.type === 'match_columns');
 
   const unansweredMC = mcItems.filter(i => !answers[i._id]?.selectedAnswer);
-  const unansweredEssay = essayItems.filter(i => !answers[i._id]?.essayAnswer?.trim());
+  const unansweredEssay = essayItems.filter(i => !answers[i._id]?.essayAnswer?.trim() && !answers[i._id]?.essayImage);
   const unansweredDnd = dndItems.filter(i => {
       if (!answers[i._id]?.dragAndDropMatches) return true;
       let totalFilled = 0;
@@ -168,6 +188,7 @@ const ExerciseDetail = () => {
           exerciseItemId: item._id,
           selectedAnswer: answers[item._id]?.selectedAnswer || '',
           essayAnswer: answers[item._id]?.essayAnswer || '',
+          essayImage: answers[item._id]?.essayImage || '',
           dragAndDropMatches: answers[item._id]?.dragAndDropMatches || []
         }));
 
@@ -192,6 +213,14 @@ const ExerciseDetail = () => {
   if (loading) {
     return <div className="h-screen w-full flex items-center justify-center text-2xl font-bold text-blue-800">Đang tải bài tập...</div>;
   }
+
+  const getQuestionNumber = (index) => {
+    let count = 0;
+    for (let j = 0; j <= index; j++) {
+      if (items[j].type !== 'document') count++;
+    }
+    return count;
+  };
 
   if (!exercise) {
     return (
@@ -269,7 +298,7 @@ const ExerciseDetail = () => {
                       <span className="font-bold text-gray-700">{item.title}</span>
                       <span className="ml-2 text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">Tài liệu</span>
                     </div>
-                    <div className="text-gray-800 whitespace-pre-wrap leading-relaxed">{item.content}</div>
+                    <div className="text-gray-800 leading-relaxed" dangerouslySetInnerHTML={{ __html: item.content }} />
                   </div>
                 )}
 
@@ -278,10 +307,10 @@ const ExerciseDetail = () => {
                   <div>
                     <div className="flex items-center mb-3">
                       <CheckSquare size={18} className="text-green-500 mr-2" />
-                      <span className="font-bold text-gray-700">Câu {i}. {item.title}</span>
+                      <span className="font-bold text-gray-700">Câu {getQuestionNumber(i)}. {item.title}</span>
                       <span className="ml-2 text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded-full">Trắc nghiệm</span>
                     </div>
-                    <p className="text-gray-800 mb-4 font-medium">{item.questionText}</p>
+                    <div className="text-gray-800 mb-4 font-medium" dangerouslySetInnerHTML={{ __html: item.questionText }} />
 
                     <div className="space-y-2">
                       {(item.shuffledOptions || []).map((opt) => {
@@ -326,20 +355,50 @@ const ExerciseDetail = () => {
                   <div>
                     <div className="flex items-center mb-3">
                       <AlignLeft size={18} className="text-purple-500 mr-2" />
-                      <span className="font-bold text-gray-700">{item.title}</span>
+                      <span className="font-bold text-gray-700">Câu {getQuestionNumber(i)}. {item.title}</span>
                       <span className="ml-2 text-xs bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full">Tự luận</span>
                     </div>
-                    <p className="text-gray-800 mb-4 font-medium">{item.essayPrompt}</p>
-                    <textarea
-                      rows={6}
-                      placeholder="Nhập câu trả lời của bạn..."
+                    <div className="text-gray-800 mb-4 font-medium" dangerouslySetInnerHTML={{ __html: item.essayPrompt }} />
+                    <RichTextEditor
+                      placeholder="Nhập câu trả lời của bạn (bôi đen chữ để in đậm, in nghiêng, gạch chân)..."
                       value={answers[item._id]?.essayAnswer || ''}
-                      onChange={(e) => !submitted && handleEssayAnswer(item._id, e.target.value)}
+                      onChange={(html) => !submitted && handleEssayAnswer(item._id, html)}
                       disabled={submitted}
-                      className="w-full border border-gray-300 rounded-lg p-4 focus:outline-none focus:ring-2 focus:ring-purple-400 resize-y bg-white disabled:bg-gray-100 disabled:text-gray-700"
+                      className="mb-3 focus-within:ring-2 focus-within:ring-purple-400 border-purple-200"
                     />
+
+                    {/* Image Upload for Essay */}
+                    {!submitted && !answers[item._id]?.essayImage && (
+                      <div className="flex items-center">
+                        <label className="cursor-pointer flex items-center px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors font-medium text-sm">
+                          <Camera size={18} className="mr-2" />
+                          Đính kèm ảnh bài làm
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            className="hidden" 
+                            onChange={(e) => handleEssayImageUpload(item._id, e.target.files[0])}
+                          />
+                        </label>
+                      </div>
+                    )}
+                    {answers[item._id]?.essayImage && (
+                      <div className="relative inline-block mt-2">
+                        <img src={answers[item._id].essayImage} alt="Bài làm" className="max-h-[300px] rounded-lg border border-gray-300 shadow-sm" />
+                        {!submitted && (
+                          <button 
+                            onClick={() => removeEssayImage(item._id)}
+                            className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full p-1 shadow hover:bg-red-600 transition-colors"
+                            title="Xóa ảnh"
+                          >
+                            <X size={16} />
+                          </button>
+                        )}
+                      </div>
+                    )}
+
                     {submitted && (
-                      <div className="mt-3 p-3 bg-purple-50 border border-purple-200 rounded-lg flex justify-between items-center">
+                      <div className="mt-4 p-3 bg-purple-50 border border-purple-200 rounded-lg flex justify-between items-center">
                         <span className="font-semibold text-purple-800">Điểm tự luận:</span>
                         <span className="text-lg font-bold text-purple-700">
                           {answers[item._id]?.essayScore !== null && answers[item._id]?.essayScore !== undefined 
@@ -356,7 +415,7 @@ const ExerciseDetail = () => {
                   <div>
                     <div className="flex items-center mb-3">
                       <CheckSquare size={18} className="text-orange-500 mr-2" />
-                      <span className="font-bold text-gray-700">{item.title}</span>
+                      <span className="font-bold text-gray-700">Câu {getQuestionNumber(i)}. {item.title}</span>
                       <span className="ml-2 text-xs bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full">Kéo thả đáp án</span>
                     </div>
                     <p className="text-gray-800 mb-4 font-medium text-sm italic">
@@ -464,7 +523,7 @@ const ExerciseDetail = () => {
                   <div>
                     <div className="flex items-center mb-3">
                       <LinkIcon size={18} className="text-indigo-500 mr-2" />
-                      <span className="font-bold text-gray-700">{item.title}</span>
+                      <span className="font-bold text-gray-700">Câu {getQuestionNumber(i)}. {item.title}</span>
                       <span className="ml-2 text-xs bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full">Nối cột</span>
                     </div>
                     <p className="text-gray-800 mb-4 font-medium text-sm italic">

@@ -17,20 +17,19 @@ const UserHeader = () => {
   return (
     <div className="flex flex-col items-center justify-between w-full relative z-20">
 
-      <div className='bg-blue-300 p-4 md:p-8 shadow-md w-full flex flex-col md:flex-row items-center justify-between gap-4'>
-        <div className="flex w-full justify-between items-center">
-          <Link to="/lessons" className="flex items-center">
-            <img src={LiterlyLogoSmall} alt="Literly Logo" className="h-10 md:h-12 mr-2" />
-          </Link>
-          <div className="flex items-center space-x-4">
-            <Bell size={24} className="text-gray-600 hover:text-blue-500 cursor-pointer" />
-            <AvatarDropdown />
-          </div>
-        </div>
+      <div className='bg-blue-300 p-4 md:p-8 shadow-md w-full flex flex-wrap md:flex-nowrap items-center justify-between gap-4'>
+        <Link to="/lessons" className="flex items-center">
+          <img src={LiterlyLogoSmall} alt="Literly Logo" className="h-10 md:h-12 mr-2" />
+        </Link>
 
-        <div className="flex items-center justify-center w-full md:w-auto mt-2 md:mt-0">
+        <div className="flex items-center justify-center flex-grow md:flex-grow-0 order-3 md:order-none w-full md:w-auto">
           <h1 className="text-lg md:text-xl font-bold text-gray-800 mr-2 md:mr-4 text-center tracking-wide">TRÁI ĐẤT - NGÔI NHÀ CHUNG</h1>
           <img src={EarthGlobeIcon} alt="Earth Globe" className="h-8 md:h-12 hidden md:block" />
+        </div>
+
+        <div className="flex items-center space-x-2 md:space-x-4 order-2 md:order-none">
+          <Bell size={24} className="text-gray-600 hover:text-blue-500 cursor-pointer" />
+          <AvatarDropdown />
         </div>
       </div>
 

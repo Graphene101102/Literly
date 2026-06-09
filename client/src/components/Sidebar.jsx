@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import DefaultAvatar from '../assets/user-avatar.png';
+import DefaultAvatar from '../assets/avatar-default.jpg';
 import { Menu, X } from 'lucide-react';
 
 const API_BASE = import.meta.env.MODE === 'production' ? '' : 'http://localhost:5001';
